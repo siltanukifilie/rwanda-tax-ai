@@ -35,3 +35,7 @@ Desktop.ini
 data/processed/**
 !data/processed/.gitkeep
 
+# Local vector index artifacts (generated)
+faiss.index
+chunks.pkl
+

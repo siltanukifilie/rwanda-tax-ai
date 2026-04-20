@@ -2,11 +2,13 @@
 python-dotenv>=1.0.0
 pypdf>=4.0.0
 llama-index>=0.11.0
+numpy>=1.26.0
+sentence-transformers>=2.6.0
+faiss-cpu>=1.8.0
+transformers>=4.41.0
+torch>=2.2.0
 
 # Optional common RAG dependencies (uncomment when you add them)
-# numpy>=1.26.0
-# sentence-transformers>=2.6.0
-# faiss-cpu>=1.8.0
 # tiktoken>=0.6.0
 # openai>=1.0.0
 # langchain>=0.2.0
