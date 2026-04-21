@@ -120,6 +120,37 @@ def retrieve_top_chunks(index: faiss.Index, chunks: list[str], query_vec: np.nda
     return results
 
 
+def _clean_context_text(text: str) -> str:
+    """
+    Basic cleanup to reduce duplicated lines and common boilerplate.
+
+    This keeps the logic simple and beginner-friendly:
+    - trims whitespace
+    - removes repeated identical lines (often headers/footers)
+    - drops very short/empty lines
+    """
+    lines = [ln.strip() for ln in text.splitlines()]
+
+    cleaned: list[str] = []
+    seen: set[str] = set()
+
+    for ln in lines:
+        if not ln:
+            continue
+
+        # Skip tiny lines that are often page numbers or artifacts.
+        if len(ln) <= 2 and ln.isdigit():
+            continue
+
+        key = ln.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        cleaned.append(ln)
+
+    return "\n".join(cleaned).strip()
+
+
 def build_prompt(retrieved_chunks: list[str], user_question: str) -> str:
     """Build the prompt in the exact format requested."""
     # ONLY keep top 2–3 chunks (we use 2 by default for safety)
@@ -127,23 +158,33 @@ def build_prompt(retrieved_chunks: list[str], user_question: str) -> str:
 
     # JOIN + TRIM HARD (VERY IMPORTANT FIX)
     context = "\n\n".join(top_chunks)
+    context = _clean_context_text(context)
     context = context[:MAX_CONTEXT_CHARS]
 
-    return f"""You are a Rwanda Tax Expert AI.
+    return f"""
+You are a Rwanda Tax Expert AI assistant.
 
-Answer in a clear ChatGPT-style format:
+You help users understand Rwanda tax topics using retrieved knowledge (RAG) and general knowledge.
 
+RULES:
+1. The retrieved context is the ONLY source of factual correctness.
+2. Extract key facts from the context. Do NOT copy it verbatim.
+3. Use your general knowledge ONLY to explain, simplify, and give examples.
+4. Never contradict the retrieved context.
+5. If context is missing information, clearly explain what is known and what is general knowledge.
+6. Remove repetition, boilerplate, and duplicated text.
+
+OUTPUT FORMAT:
 - Title
-- Explanation
-- Bullet points
-- Simple example (if needed)
+- Clear Explanation
+- Bullet Points (if useful)
+- Simple Real-World Example (if applicable)
 
-Rules:
-- Do NOT repeat the question
-- Do NOT repeat phrases
-- Do NOT give one-line answers
-- Be structured and professional
-- Use only the given context
+STYLE:
+- Simple and human
+- No raw retrieval text
+- No repetition
+- Structured like ChatGPT answers
 
 Context:
 {context}

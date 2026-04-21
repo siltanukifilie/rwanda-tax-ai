@@ -8,7 +8,7 @@ This repo is a starting folder structure for a Retrieval-Augmented Generation (R
 - `data/processed/`: derived artifacts (chunks, embeddings, vector index, metadata)
 - `src/`: library code (loaders, chunking, indexing, retrieval, evaluation, etc.)
 - `app.py`: Streamlit UI (optional)
-- `backend/`: FastAPI backend (for full-stack web UI)
+- `api/`: FastAPI backend (Vercel-compatible)
 - `frontend/`: ChatGPT-style static frontend (HTML/CSS/JS)
 - `requirements.txt`: Python dependencies
 
@@ -39,7 +39,7 @@ This produces:
 
 ```bash
 python -m pip install -r requirements.txt
-uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+python -m uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 Health check: `GET http://127.0.0.1:8000/health`

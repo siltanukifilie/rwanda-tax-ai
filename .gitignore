@@ -1,21 +1,29 @@
+# =========================
 # Python
+# =========================
 __pycache__/
 *.py[cod]
 *.pyd
 *.so
 .Python
 
+# =========================
 # Virtual environments
+# =========================
 .venv/
 venv/
 ENV/
 
-# Packaging
+# =========================
+# Packaging / Build
+# =========================
 build/
 dist/
 *.egg-info/
 
-# Tooling
+# =========================
+# Tooling / Testing
+# =========================
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
@@ -23,19 +31,45 @@ dist/
 .coverage.*
 htmlcov/
 
-# IDE
+# =========================
+# IDE / Editor
+# =========================
 .vscode/
 .idea/
 
-# OS
+# =========================
+# OS Files
+# =========================
 Thumbs.db
 Desktop.ini
+.DS_Store
 
-# Project data artifacts
+# =========================
+# Environment variables (IMPORTANT)
+# =========================
+.env
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Data artifacts
+# =========================
 data/processed/**
 !data/processed/.gitkeep
 
-# Local vector index artifacts (generated)
+# =========================
+# Vector DB / RAG artifacts
+# =========================
 faiss.index
+*.faiss
 chunks.pkl
+*.pkl
 
+# =========================
+# Model cache (HuggingFace)
+# =========================
+.cache/
+huggingface/

@@ -4,14 +4,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from backend.rag import chat, get_pipeline
+from api.rag import chat, get_pipeline
 
 
+# Vercel will look for a FastAPI app object in api/*.py
 app = FastAPI(title="Rwanda Tax AI Assistant API", version="1.0.0")
 
 
-# Allow frontend to call the API from a different origin during development.
-# In production, replace "*" with your real domain.
+# Allow browser-based frontend calls.
+# For production, restrict this to your deployed frontend domain.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,26 +30,23 @@ class ChatResponse(BaseModel):
     answer: str
 
 
-@app.on_event("startup")
-def _warmup() -> None:
-    """
-    Optional warmup so the first chat request is fast.
-
-    This loads:
-    - FAISS index
-    - sentence-transformers embedder
-    - Hugging Face model/tokenizer
-    """
-    try:
-        get_pipeline()
-    except Exception:
-        # Don't crash the server at startup; errors will surface on /chat.
-        pass
+@app.get("/")
+def root() -> dict:
+    return {"message": "API is running"}
 
 
 @app.get("/health")
 def health() -> dict:
     return {"status": "ok"}
+
+
+@app.on_event("startup")
+def _warmup() -> None:
+    """Optional warmup to load models early (best-effort)."""
+    try:
+        get_pipeline()
+    except Exception:
+        pass
 
 
 @app.post("/chat", response_model=ChatResponse)
