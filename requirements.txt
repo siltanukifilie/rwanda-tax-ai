@@ -7,6 +7,9 @@ sentence-transformers>=2.6.0
 faiss-cpu>=1.8.0
 transformers>=4.41.0
 torch>=2.2.0
+streamlit>=1.35.0
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
 
 # Optional common RAG dependencies (uncomment when you add them)
 # tiktoken>=0.6.0

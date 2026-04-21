@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rwanda Tax AI Assistant</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="logo">🇷🇼</div>
+          <div class="brand-text">
+            <div class="brand-title">Rwanda Tax AI</div>
+            <div class="brand-subtitle">Assistant</div>
+          </div>
+        </div>
+
+        <button id="clearBtn" class="btn btn-secondary">Clear chat</button>
+
+        <div class="examples">
+          <div class="examples-title">Try an example</div>
+          <button class="chip" data-example="What is VAT?">What is VAT?</button>
+          <button class="chip" data-example="Tax rates in Rwanda">Tax rates in Rwanda</button>
+          <button class="chip" data-example="Pension contribution">Pension contribution</button>
+        </div>
+
+        <div class="sidebar-footer">
+          <div class="hint">
+            Backend endpoint:
+            <span class="mono" id="apiUrlLabel"></span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="title">
+            Rwanda Tax AI Assistant <span class="flag">🇷🇼</span>
+          </div>
+          <div class="status" id="statusPill">Ready</div>
+        </header>
+
+        <section class="chat" id="chat">
+          <div class="welcome">
+            <div class="welcome-title">Ask Rwanda tax questions</div>
+            <div class="welcome-text">
+              This chatbot retrieves relevant passages from your indexed documents (FAISS) and uses an LLM to answer.
+            </div>
+          </div>
+        </section>
+
+        <footer class="composer">
+          <div class="composer-inner">
+            <textarea
+              id="messageInput"
+              class="input"
+              placeholder="Type your message…"
+              rows="1"
+            ></textarea>
+            <button id="sendBtn" class="btn btn-primary">Send</button>
+          </div>
+          <div class="composer-meta">
+            Press <span class="kbd">Enter</span> to send • <span class="kbd">Shift</span>+<span class="kbd">Enter</span> for newline
+          </div>
+        </footer>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
+

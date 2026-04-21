@@ -52,6 +52,42 @@ TOP_CHUNKS_FOR_LLM = 2
 MAX_CONTEXT_CHARS = 800
 
 
+def load_rag_pipeline() -> tuple[faiss.Index, list[str], SentenceTransformer, AutoTokenizer, AutoModelForSeq2SeqLM]:
+    """
+    Load everything needed for RAG (index, chunks, embedder, tokenizer, LLM).
+
+    The Streamlit UI should call this once and reuse the returned objects.
+    """
+    if not FAISS_INDEX_PATH.exists() or not CHUNKS_PATH.exists():
+        raise FileNotFoundError(
+            "Missing FAISS artifacts. Build them first with: python .\\src\\build_faiss_index.py"
+        )
+
+    index = faiss.read_index(str(FAISS_INDEX_PATH))
+    chunks = load_chunks(CHUNKS_PATH)
+    embedder = SentenceTransformer(EMBEDDING_MODEL_NAME)
+    tokenizer = AutoTokenizer.from_pretrained(LLM_MODEL_NAME)
+    llm = AutoModelForSeq2SeqLM.from_pretrained(LLM_MODEL_NAME)
+
+    return index, chunks, embedder, tokenizer, llm
+
+
+def answer_question(
+    user_question: str,
+    *,
+    index: faiss.Index,
+    chunks: list[str],
+    embedder: SentenceTransformer,
+    tokenizer: AutoTokenizer,
+    llm: AutoModelForSeq2SeqLM,
+) -> str:
+    """Run retrieval + prompt + generation and return the final answer text."""
+    query_vec = embed_query(embedder, user_question)
+    retrieved_chunks = retrieve_top_chunks(index, chunks, query_vec, top_k=TOP_K)
+    prompt = build_prompt(retrieved_chunks=retrieved_chunks, user_question=user_question)
+    return generate_response(tokenizer=tokenizer, model=llm, prompt=prompt)
+
+
 def load_chunks(path: Path) -> list[str]:
     """Load a pickled list of chunk texts (list[str])."""
     with path.open("rb") as f:
@@ -158,19 +194,9 @@ def main() -> None:
         print(r"  python .\src\build_faiss_index.py")
         return
 
-    # 2) Load FAISS + chunks
-    print("Loading FAISS index and chunks ...")
-    index = faiss.read_index(str(FAISS_INDEX_PATH))
-    chunks = load_chunks(CHUNKS_PATH)
-
-    # 3) Load embedding model (for retrieval)
-    print(f"Loading embedding model: {EMBEDDING_MODEL_NAME}")
-    embedder = SentenceTransformer(EMBEDDING_MODEL_NAME)
-
-    # 4) Load Hugging Face model + tokenizer (for generation)
-    print(f"Loading Hugging Face LLM: {LLM_MODEL_NAME}")
-    tokenizer = AutoTokenizer.from_pretrained(LLM_MODEL_NAME)
-    llm = AutoModelForSeq2SeqLM.from_pretrained(LLM_MODEL_NAME)
+    # 2) Load everything needed for RAG
+    print("Loading RAG pipeline ...")
+    index, chunks, embedder, tokenizer, llm = load_rag_pipeline()
 
     print("\nRAG chatbot is ready.")
     print("Type your question. Type 'exit' to quit.\n")
@@ -182,13 +208,15 @@ def main() -> None:
         if user_question.lower() in {"exit", "quit"}:
             break
 
-        # 5) Retrieve relevant context
-        query_vec = embed_query(embedder, user_question)
-        retrieved_chunks = retrieve_top_chunks(index, chunks, query_vec, top_k=TOP_K)
-
-        # 6) Build prompt and generate final answer
-        prompt = build_prompt(retrieved_chunks=retrieved_chunks, user_question=user_question)
-        final_answer = generate_response(tokenizer=tokenizer, model=llm, prompt=prompt)
+        # 5) Answer using the RAG pipeline
+        final_answer = answer_question(
+            user_question,
+            index=index,
+            chunks=chunks,
+            embedder=embedder,
+            tokenizer=tokenizer,
+            llm=llm,
+        )
 
         # 7) Print the final answer in a clean format
         print("\nAnswer:\n")
