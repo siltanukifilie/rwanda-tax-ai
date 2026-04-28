@@ -1,3 +1,10 @@
+---
+title: Rwanda Tax AI Assistant
+sdk: streamlit
+app_file: app.py
+python_version: "3.10"
+---
+
 ## Rwanda Tax AI — RAG App Scaffold
 
 This repo is a starting folder structure for a Retrieval-Augmented Generation (RAG) app.

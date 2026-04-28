@@ -22,12 +22,17 @@ First run note:
 from __future__ import annotations
 
 import pickle
+import warnings
 from pathlib import Path
 
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+
+# Suppress non-critical model loading warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", message=".*tied weights.*")
 
 
 # Files produced by: python .\src\build_faiss_index.py
@@ -67,7 +72,7 @@ def load_rag_pipeline() -> tuple[faiss.Index, list[str], SentenceTransformer, Au
     chunks = load_chunks(CHUNKS_PATH)
     embedder = SentenceTransformer(EMBEDDING_MODEL_NAME)
     tokenizer = AutoTokenizer.from_pretrained(LLM_MODEL_NAME)
-    llm = AutoModelForSeq2SeqLM.from_pretrained(LLM_MODEL_NAME)
+    llm = AutoModelForSeq2SeqLM.from_pretrained(LLM_MODEL_NAME, tie_word_embeddings=False)
 
     return index, chunks, embedder, tokenizer, llm
 
